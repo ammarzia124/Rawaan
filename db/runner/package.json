@@ -1,0 +1,11 @@
+{
+  "name": "rawaan-db-runner",
+  "private": true,
+  "type": "module",
+  "description": "Applies supabase/migrations and runs db/tests/*.test.sql in an in-process Postgres (PGlite + PostGIS). No Docker, no psql.",
+  "scripts": { "test": "node run.mjs" },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "@electric-sql/pglite-postgis": "0.2.10"
+  }
+}

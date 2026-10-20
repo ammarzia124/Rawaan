@@ -1,0 +1,65 @@
+{
+  "skill_name": "rawaan-db",
+  "evals": [
+    {
+      "id": 1,
+      "name": "school-holiday-table",
+      "prompt": "We need to stop scheduling rides on school holidays. Add a table where each school can record its holidays (the date and a reason), as a new migration with a test for it. Make sure the tests pass.",
+      "expected_output": "A new migration after D4 creating a singular school_holiday table that follows every D1 convention (unqualified, updated_at trigger, fk_/uq_/ck_ naming, COMMENT ON, no RLS), plus a d-style DO-block test, with the runner ALL GREEN.",
+      "files": [],
+      "expectations": [
+        "Runner reports ALL GREEN with the new migration and test applied",
+        "New migration is numbered after 20261006000004 and opens with SET search_path TO public, extensions;",
+        "New migration writes objects unqualified (no `public.` schema prefixes)",
+        "New migration does not enable RLS (deferred to D8)",
+        "Every table in the schema has updated_at and its trg_<table>_updated_at trigger",
+        "New test follows the house style: DO $test$ block, failures accumulated in v_failures, one final RAISE EXCEPTION",
+        "Negative test cases assert the constraint name via SQLERRM LIKE",
+        "Every new view is created WITH (security_invoker = true)",
+        "Holiday table name is singular (school_holiday), not plural",
+        "Foreign key to school is named fk_<table>_school_id",
+        "Uniqueness of (school_id, holiday date) exists and is named with the uq_ prefix"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "sibling-discount",
+      "prompt": "Parents with two or more kids riding with us keep asking for a sibling discount. Let's give 10% off for the second child onwards. Implement it in the database (migration + test), runner must stay green.",
+      "expected_output": "Discount represented without floats, without touching the enrollment bps split or allocate_split, never read from rate_snapshot at invoice time, frozen at enrolment or visible as an invoice line/discount; tests pass.",
+      "files": [],
+      "expectations": [
+        "Runner reports ALL GREEN with the new migration and test applied",
+        "New migration is numbered after 20261006000004 and opens with SET search_path TO public, extensions;",
+        "New migration writes objects unqualified (no `public.` schema prefixes)",
+        "New migration does not enable RLS (deferred to D8)",
+        "Every table in the schema has updated_at and its trg_<table>_updated_at trigger",
+        "New test follows the house style: DO $test$ block, failures accumulated in v_failures, one final RAISE EXCEPTION",
+        "Negative test cases assert the constraint name via SQLERRM LIKE",
+        "Every new view is created WITH (security_invoker = true)",
+        "No float/real/double precision column or arithmetic for money in the new migration",
+        "Does not redefine allocate_split or change how the driver/school/rawaan bps triple must sum to 10000",
+        "Discount is frozen (on the enrollment or as an invoice line/discount_paisa) rather than recomputed from live data at read time"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "school-earnings-view",
+      "prompt": "School principals want a dashboard number: how many of their students are billable this month, and how much money the school has earned from Rawaan. Write the database side of it (a migration + test).",
+      "expected_output": "A view or function with security_invoker (or a guarded SECURITY DEFINER with pinned search_path), billable count via is_billable()/route logic not the school roll, earnings only from split_allocation school legs on PAID invoices, paisa bigint; tests pass.",
+      "files": [],
+      "expectations": [
+        "Runner reports ALL GREEN with the new migration and test applied",
+        "New migration is numbered after 20261006000004 and opens with SET search_path TO public, extensions;",
+        "New migration writes objects unqualified (no `public.` schema prefixes)",
+        "New migration does not enable RLS (deferred to D8)",
+        "Every table in the schema has updated_at and its trg_<table>_updated_at trigger",
+        "New test follows the house style: DO $test$ block, failures accumulated in v_failures, one final RAISE EXCEPTION",
+        "Negative test cases assert the constraint name via SQLERRM LIKE",
+        "Every new view is created WITH (security_invoker = true)",
+        "Billable count uses is_billable() or v_billable_enrollment (route-aware), not the raw student roll",
+        "School earnings come from school-leg split_allocation on invoices with status 'paid' only",
+        "Money is returned as integer paisa (bigint), not numeric/float rupees"
+      ]
+    }
+  ]
+}
